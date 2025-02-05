@@ -178,11 +178,6 @@ class postgresql::server::config {
         notify  => [ Exec['restart-systemd'], Class['postgresql::server::service'] ],
         before  => Class['postgresql::server::reload'],
       }
-      exec { 'restart-systemd':
-        command     => 'systemctl daemon-reload',
-        refreshonly => true,
-        path        => '/bin:/usr/bin:/usr/local/bin'
-      }
     } else {
       # For Rocky 9 and other non-RHEL7 systems: use a drop-in override.
       file { 'systemd-override':
@@ -195,6 +190,11 @@ class postgresql::server::config {
         before  => Class['postgresql::server::reload'],
       }
     } 
+    exec { 'restart-systemd':
+      command     => 'systemctl daemon-reload',
+      refreshonly => true,
+      path        => '/bin:/usr/bin:/usr/local/bin'
+    }
   }
   elsif $::osfamily == 'Gentoo' {
     # Template uses:
