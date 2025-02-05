@@ -168,6 +168,7 @@ class postgresql::server::config {
       # - $service_name
       # - $port
       # - $datadir
+      # For RHEL 7 / Fedora: use full service file override.
       file { 'systemd-override':
         ensure  => present,
         path    => "/etc/systemd/system/${service_name}.service",
@@ -182,7 +183,18 @@ class postgresql::server::config {
         refreshonly => true,
         path        => '/bin:/usr/bin:/usr/local/bin'
       }
-    }
+    } else {
+      # For Rocky 9 and other non-RHEL7 systems: use a drop-in override.
+      file { 'systemd-override':
+        ensure  => present,
+        path    => "/etc/systemd/system/${service_name}.service.d/override.conf",
+        owner   => 'root',
+        group   => 'root',
+        content => template('postgresql/systemd-override-dropin.erb'),
+        notify  => [ Exec['restart-systemd'], Class['postgresql::server::service'] ],
+        before  => Class['postgresql::server::reload'],
+      }
+    } 
   }
   elsif $::osfamily == 'Gentoo' {
     # Template uses:
