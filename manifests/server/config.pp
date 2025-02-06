@@ -180,6 +180,13 @@ class postgresql::server::config {
       }
     } else {
       # For Rocky 9 and other non-RHEL7 systems: use a drop-in override.
+      file { "${service_name}_dropin_dir":
+        ensure => directory,
+        path   => "/etc/systemd/system/${service_name}.service.d",
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755',
+      }
       file { 'systemd-override':
         ensure  => present,
         path    => "/etc/systemd/system/${service_name}.service.d/override.conf",
