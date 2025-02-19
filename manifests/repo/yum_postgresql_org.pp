@@ -49,4 +49,10 @@ class postgresql::repo::yum_postgresql_org inherits postgresql::repo {
   }
 
   Yumrepo['yum.postgresql.org'] -> Package<|tag == 'puppetlabs-postgresql'|>
+
+  exec { 'yum-refresh':
+     command     => '/usr/bin/yum clean all && /usr/bin/yum makecache',
+     refreshonly => true,
+     subscribe   => [ Yumrepo['yum.postgresql.org'], Yumrepo['pgdg-common'] ],
+  }
 }
